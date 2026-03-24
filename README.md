@@ -69,6 +69,37 @@ Gold)**, com orquestração via **Databricks Workflows**.
 
 ------------------------------------------------------------------------
 
+
+## 🏗️ DELTA LIVE TABLES PIPELINE
+┌─────────────────────────────────────────────────────────────────────┐
+│                    DELTA LIVE TABLES PIPELINE                       │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌────────────────────────────────────────────────────────────┐     │
+│  │              STREAMING TABLES (Auto-loader)                │     │
+│  │  • Ingestão automática de arquivos JSON/CSV                │     │
+│  │  • Schema evolution automática                             │     │
+│  │  • CloudFiles source para dados brutos                     │     │
+│  └────────────────────────────────────────────────────────────┘     │
+│                              │                                      │
+│                              ▼                                      │
+│  ┌────────────────────────────────────────────────────────────┐     │
+│  │              LIVE TABLES (Processamento)                   │     │
+│  │  • Limpeza e transformação                                 │     │
+│  │  • Enriquecimento de dados                                 │     │
+│  │  • Qualidade de dados com EXPECTATIONS                     │     │
+│  └────────────────────────────────────────────────────────────┘     │
+│                              │                                      │
+│                              ▼                                      │
+│  ┌────────────────────────────────────────────────────────────┐     │
+│  │              MATERIALIZED VIEWS (Agregações)               │     │
+│  │  • Views atualizadas automaticamente                       │     │
+│  │  • Otimizadas para consultas                               │     │
+│  └────────────────────────────────────────────────────────────┘     │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+------------------------------------------------------------------------
+
 ## 📊 Fontes de Dados
 
 -   Ergast API (histórico)\
