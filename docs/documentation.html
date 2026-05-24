@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F1 Lakehouse — Documentação Técnica</title>
+  <style>
+    :root {
+      --red:       #e10600;
+      --red-dark:  #a80400;
+      --bg:        #0d0d0d;
+      --bg-card:   #161616;
+      --bg-card2:  #1e1e1e;
+      --border:    #2a2a2a;
+      --text:      #e8e8e8;
+      --text-muted:#8a8a8a;
+      --accent:    #ff6b35;
+      --gold:      #f5c518;
+      --silver:    #a8a9ad;
+      --bronze:    #cd7f32;
+      --green:     #22c55e;
+      --blue:      #3b82f6;
+      --font:      'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono:      'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      --sidebar-w: 260px;
+      --radius:    8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.7;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand .logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--red);
+      letter-spacing: -0.5px;
+    }
+    .nav-brand .sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-section {
+      padding: 16px 20px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    nav a:hover,
+    nav a.active {
+      color: var(--text);
+      background: rgba(225, 6, 0, 0.08);
+      border-left-color: var(--red);
+    }
+    nav a .icon { font-size: 15px; flex-shrink: 0; }
+
+    /* ── MAIN ── */
+    main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      max-width: 1100px;
+      padding: 48px 56px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a0000 0%, #0d0d0d 60%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px 48px 40px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--accent));
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(225, 6, 0, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(225, 6, 0, 0.3);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+    .hero h1 span { color: var(--red); }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 640px;
+      margin-bottom: 28px;
+    }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge.red    { background: rgba(225,6,0,.12);    color: #ff4d4d;  border-color: rgba(225,6,0,.25); }
+    .badge.orange { background: rgba(255,107,53,.12); color: var(--accent); border-color: rgba(255,107,53,.25); }
+    .badge.blue   { background: rgba(59,130,246,.12); color: #60a5fa;  border-color: rgba(59,130,246,.25); }
+    .badge.green  { background: rgba(34,197,94,.12);  color: #4ade80;  border-color: rgba(34,197,94,.25); }
+    .badge.yellow { background: rgba(245,197,24,.12); color: var(--gold); border-color: rgba(245,197,24,.25); }
+
+    /* ── SECTION ── */
+    section { margin-bottom: 56px; scroll-margin-top: 32px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-header .icon {
+      width: 36px; height: 36px;
+      background: rgba(225,6,0,.12);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── CARDS ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: #3a3a3a; }
+    .card .card-icon { font-size: 24px; margin-bottom: 10px; }
+    .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .card p  { font-size: 13px; color: var(--text-muted); }
+    .card code {
+      display: block;
+      margin-top: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(255,107,53,.08);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* ── PIPELINE FLOW ── */
+    .pipeline {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .pipeline-stage {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 20px;
+    }
+    .pipeline-stage:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .pipeline-stage:last-child  { border-radius: 0 var(--radius) var(--radius) 0; border-right: 1px solid var(--border); }
+
+    .stage-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stage-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .stage-dot.bronze { background: var(--bronze); }
+    .stage-dot.silver { background: var(--silver); }
+    .stage-dot.gold   { background: var(--gold); }
+
+    .stage-header h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .stage-header small { color: var(--text-muted); font-size: 11px; }
+
+    .table-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .table-pill .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .table-pill .dot.bronze { background: var(--bronze); }
+    .table-pill .dot.silver { background: var(--silver); }
+    .table-pill .dot.gold   { background: var(--gold); }
+
+    .arrow {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px;
+      color: var(--text-muted);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ── TABLE DOCS ── */
+    .table-doc {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .table-doc-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .table-doc-header .left { display: flex; align-items: center; gap: 12px; }
+    .table-layer-badge {
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .layer-bronze { background: rgba(205,127,50,.15); color: var(--bronze); border: 1px solid rgba(205,127,50,.3); }
+    .layer-silver { background: rgba(168,169,173,.12); color: var(--silver); border: 1px solid rgba(168,169,173,.25); }
+    .layer-gold   { background: rgba(245,197,24,.12); color: var(--gold);   border: 1px solid rgba(245,197,24,.25); }
+
+    .table-doc-header h3 { font-size: 16px; font-weight: 700; font-family: var(--mono); }
+    .table-doc-header p  { color: var(--text-muted); font-size: 13px; }
+
+    .col-table { width: 100%; border-collapse: collapse; }
+    .col-table thead tr {
+      background: var(--bg-card2);
+      border-bottom: 1px solid var(--border);
+    }
+    .col-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+    .col-table td {
+      padding: 10px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .col-table tr:last-child td { border-bottom: none; }
+    .col-table tr:hover td { background: rgba(255,255,255,.02); }
+    .col-table td code {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(255,107,53,.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .col-table td .type-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--blue);
+      background: rgba(59,130,246,.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(59,130,246,.2);
+    }
+    .col-table td .calc-tag {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--green);
+      background: rgba(34,197,94,.1);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid rgba(34,197,94,.2);
+      margin-left: 4px;
+      font-weight: 600;
+    }
+    .col-table td .pk-tag {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--gold);
+      background: rgba(245,197,24,.1);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid rgba(245,197,24,.2);
+      margin-left: 4px;
+      font-weight: 600;
+    }
+
+    /* ── TECH GRID ── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .tech-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .tech-item .tech-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .tech-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .tech-item p  { font-size: 12px; color: var(--text-muted); }
+
+    /* ── SOURCE TABLE ── */
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .source-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .source-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .source-card .source-type {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .source-card p { font-size: 13px; color: var(--text-muted); }
+
+    /* ── EXPECTATIONS ── */
+    .exp-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .exp-block h4 {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .exp-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .exp-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .exp-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .exp-list li code {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--gold);
+      background: rgba(245,197,24,.08);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3e3e3e; }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    footer span { color: var(--red); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+<nav>
+  <div class="nav-brand">
+    <div class="logo">F1 Lakehouse</div>
+    <div class="sub">Documentação Técnica</div>
+  </div>
+
+  <div class="nav-section">Visão Geral</div>
+  <a href="#overview"      class="active"><span class="icon">🏠</span> Sobre o Projeto</a>
+  <a href="#architecture"><span class="icon">🏗️</span> Arquitetura</a>
+  <a href="#sources">     <span class="icon">📡</span> Fontes de Dados</a>
+
+  <div class="nav-section">Pipeline DLT</div>
+  <a href="#bronze"><span class="icon">🥉</span> Bronze Layer</a>
+  <a href="#silver"><span class="icon">🥈</span> Silver Layer</a>
+  <a href="#gold">  <span class="icon">🥇</span> Gold Layer</a>
+
+  <div class="nav-section">Gold — Tabelas</div>
+  <a href="#driver_standings">  <span class="icon">🏆</span> driver_standings</a>
+  <a href="#season_progression"><span class="icon">📈</span> season_progression</a>
+  <a href="#race_summary_facts"><span class="icon">🏁</span> race_summary_facts</a>
+
+  <div class="nav-section">Qualidade</div>
+  <a href="#expectations"><span class="icon">✅</span> DLT Expectations</a>
+
+  <div class="nav-section">Stack</div>
+  <a href="#technologies"><span class="icon">⚙️</span> Tecnologias</a>
+</nav>
+
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">v1.0 · Medallion Architecture</div>
+    <h1>Sistema de Engenharia de Dados<br><span>Fórmula 1</span> com Databricks</h1>
+    <p>Plataforma end-to-end de engenharia de dados para análise da Fórmula 1, implementada com Delta Live Tables, Unity Catalog e GenAI no ecossistema Databricks.</p>
+    <div class="badges">
+      <span class="badge red">Databricks DLT</span>
+      <span class="badge orange">Apache Spark</span>
+      <span class="badge blue">Delta Lake</span>
+      <span class="badge green">Python 3.10+</span>
+      <span class="badge yellow">Unity Catalog</span>
+    </div>
+  </div>
+
+  <!-- ─────────── OVERVIEW ─────────── -->
+  <section id="overview">
+    <div class="section-header">
+      <div class="icon">🏠</div>
+      <div>
+        <h2>Sobre o Projeto</h2>
+        <p>Visão geral da plataforma e seus objetivos</p>
+      </div>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>Objetivo Principal</h3>
+        <p>Construir um Data Lakehouse escalável e governado para análise de dados históricos e em tempo real da F1.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗂️</div>
+        <h3>Catálogo Unity</h3>
+        <p>Governança centralizada com Unity Catalog. Todas as tabelas residem no catálogo <code>f1_lakehouse</code>.</p>
+        <code>f1_lakehouse.{bronze|silver|gold}</code>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Delta Live Tables</h3>
+        <p>Pipelines declarativos com qualidade de dados garantida via Expectations em todas as camadas.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h3>GenAI</h3>
+        <p>Relatórios automáticos e insights narrativos gerados por modelos de linguagem a partir dos dados Gold.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── ARCHITECTURE ─────────── -->
+  <section id="architecture">
+    <div class="section-header">
+      <div class="icon">🏗️</div>
+      <div>
+        <h2>Arquitetura do Pipeline</h2>
+        <p>Fluxo Medallion — Bronze → Silver → Gold</p>
+      </div>
+    </div>
+
+    <div class="pipeline">
+      <!-- BRONZE -->
+      <div class="pipeline-stage">
+        <div class="stage-header">
+          <div class="stage-dot bronze"></div>
+          <div>
+            <h3>Bronze</h3>
+            <small>01_bronze/ergast_dlt.ipynb</small>
+          </div>
+        </div>
+        <div class="table-pill"><div class="dot bronze"></div>drivers_raw</div>
+        <div class="table-pill"><div class="dot bronze"></div>constructors_raw</div>
+        <div class="table-pill"><div class="dot bronze"></div>races_raw</div>
+        <div class="table-pill"><div class="dot bronze"></div>results_raw</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <!-- SILVER -->
+      <div class="pipeline-stage">
+        <div class="stage-header">
+          <div class="stage-dot silver"></div>
+          <div>
+            <h3>Silver</h3>
+            <small>02_silver/transformations.ipynb</small>
+          </div>
+        </div>
+        <div class="table-pill"><div class="dot silver"></div>drivers</div>
+        <div class="table-pill"><div class="dot silver"></div>constructors</div>
+        <div class="table-pill"><div class="dot silver"></div>races</div>
+        <div class="table-pill"><div class="dot silver"></div>results</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <!-- GOLD -->
+      <div class="pipeline-stage">
+        <div class="stage-header">
+          <div class="stage-dot gold"></div>
+          <div>
+            <h3>Gold</h3>
+            <small>03_gold/</small>
+          </div>
+        </div>
+        <div class="table-pill"><div class="dot gold"></div>driver_standings</div>
+        <div class="table-pill"><div class="dot gold"></div>season_progression</div>
+        <div class="table-pill"><div class="dot gold"></div>race_summary_facts</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <!-- CONSUMO -->
+      <div class="pipeline-stage">
+        <div class="stage-header">
+          <div class="stage-dot" style="background:var(--blue)"></div>
+          <div>
+            <h3>Consumo</h3>
+            <small>BI · ML · GenAI</small>
+          </div>
+        </div>
+        <div class="table-pill"><div class="dot" style="background:var(--blue)"></div>Power BI</div>
+        <div class="table-pill"><div class="dot" style="background:var(--blue)"></div>Tableau</div>
+        <div class="table-pill"><div class="dot" style="background:var(--blue)"></div>GenAI Reports</div>
+        <div class="table-pill"><div class="dot" style="background:var(--blue)"></div>ML Models</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── SOURCES ─────────── -->
+  <section id="sources">
+    <div class="section-header">
+      <div class="icon">📡</div>
+      <div>
+        <h2>Fontes de Dados</h2>
+        <p>APIs e datasets utilizados na ingestão</p>
+      </div>
+    </div>
+    <div class="source-grid">
+      <div class="source-card">
+        <h4>Ergast API (Jolpica)</h4>
+        <div class="source-type">REST / JSON · Primária</div>
+        <p>Dados históricos da F1 desde 1950. Cobre pilotos, equipes, corridas e resultados.</p>
+      </div>
+      <div class="source-card">
+        <h4>OpenF1.org</h4>
+        <div class="source-type">REST / JSON · Tempo Real</div>
+        <p>Dados de sessões em tempo real, telemetria básica e posições ao vivo.</p>
+      </div>
+      <div class="source-card">
+        <h4>FastF1</h4>
+        <div class="source-type">Biblioteca Python · Telemetria</div>
+        <p>Telemetria detalhada por volta: velocidade, DRS, ERS, setores e timing.</p>
+      </div>
+      <div class="source-card">
+        <h4>Kaggle Datasets</h4>
+        <div class="source-type">CSV · Complementar</div>
+        <p>Datasets históricos enriquecidos com metadados de circuitos e estatísticas adicionais.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── BRONZE ─────────── -->
+  <section id="bronze">
+    <div class="section-header">
+      <div class="icon">🥉</div>
+      <div>
+        <h2>Bronze Layer</h2>
+        <p>Ingestão bruta da Ergast API — sem transformações, dados preservados como recebidos</p>
+      </div>
+    </div>
+
+    <!-- bronze.drivers_raw -->
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-bronze">Bronze</span>
+          <div>
+            <h3>bronze.drivers_raw</h3>
+            <p>Dados brutos de pilotos da Ergast API — temporadas 1950–2024</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>driverId</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">string</span></td><td>Identificador único do piloto na API</td></tr>
+          <tr><td><code>givenName</code></td><td><span class="type-tag">string</span></td><td>Nome do piloto</td></tr>
+          <tr><td><code>familyName</code></td><td><span class="type-tag">string</span></td><td>Sobrenome do piloto</td></tr>
+          <tr><td><code>nationality</code></td><td><span class="type-tag">string</span></td><td>Nacionalidade</td></tr>
+          <tr><td><code>dateOfBirth</code></td><td><span class="type-tag">string</span></td><td>Data de nascimento (ISO 8601)</td></tr>
+          <tr><td><code>number</code></td><td><span class="type-tag">string</span></td><td>Número de corrida permanente</td></tr>
+          <tr><td><code>code</code></td><td><span class="type-tag">string</span></td><td>Código de 3 letras (ex: HAM, VER)</td></tr>
+          <tr><td><code>url</code></td><td><span class="type-tag">string</span></td><td>Link Wikipedia do piloto</td></tr>
+          <tr><td><code>_season</code></td><td><span class="type-tag">int</span></td><td>Temporada da ingestão</td></tr>
+          <tr><td><code>_ingested_at</code></td><td><span class="type-tag">string</span></td><td>Timestamp de ingestão</td></tr>
+          <tr><td><code>_source</code></td><td><span class="type-tag">string</span></td><td>Origem: ergast_api</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- bronze.races_raw -->
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-bronze">Bronze</span>
+          <div>
+            <h3>bronze.races_raw</h3>
+            <p>Calendário de corridas bruto com sessões de treinos e qualificação</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>season</code></td><td><span class="type-tag">string</span></td><td>Temporada</td></tr>
+          <tr><td><code>round</code></td><td><span class="type-tag">string</span></td><td>Número da rodada</td></tr>
+          <tr><td><code>raceName</code></td><td><span class="type-tag">string</span></td><td>Nome oficial do GP</td></tr>
+          <tr><td><code>date</code></td><td><span class="type-tag">string</span></td><td>Data da corrida</td></tr>
+          <tr><td><code>circuitId</code></td><td><span class="type-tag">string</span></td><td>ID do circuito</td></tr>
+          <tr><td><code>FirstPractice</code></td><td><span class="type-tag">struct</span></td><td>Data/hora do TL1</td></tr>
+          <tr><td><code>SecondPractice</code></td><td><span class="type-tag">struct</span></td><td>Data/hora do TL2</td></tr>
+          <tr><td><code>ThirdPractice</code></td><td><span class="type-tag">struct</span></td><td>Data/hora do TL3</td></tr>
+          <tr><td><code>Qualifying</code></td><td><span class="type-tag">struct</span></td><td>Data/hora da Qualificação</td></tr>
+          <tr><td><code>Sprint</code></td><td><span class="type-tag">struct</span></td><td>Data/hora do Sprint (quando houver)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- bronze.results_raw -->
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-bronze">Bronze</span>
+          <div>
+            <h3>bronze.results_raw</h3>
+            <p>Resultados brutos de cada corrida com dados de tempo, volta mais rápida e status</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>raceId</code></td><td><span class="type-tag">string</span></td><td>Rodada da corrida</td></tr>
+          <tr><td><code>driverId</code></td><td><span class="type-tag">string</span></td><td>ID do piloto</td></tr>
+          <tr><td><code>constructorId</code></td><td><span class="type-tag">string</span></td><td>ID da equipe</td></tr>
+          <tr><td><code>grid</code></td><td><span class="type-tag">string</span></td><td>Posição de largada</td></tr>
+          <tr><td><code>position</code></td><td><span class="type-tag">string</span></td><td>Posição de chegada</td></tr>
+          <tr><td><code>positionText</code></td><td><span class="type-tag">string</span></td><td>Texto da posição (número, R, D, E…)</td></tr>
+          <tr><td><code>points</code></td><td><span class="type-tag">string</span></td><td>Pontos marcados</td></tr>
+          <tr><td><code>laps</code></td><td><span class="type-tag">string</span></td><td>Voltas completadas</td></tr>
+          <tr><td><code>time</code></td><td><span class="type-tag">string</span></td><td>Tempo de chegada</td></tr>
+          <tr><td><code>milliseconds</code></td><td><span class="type-tag">string</span></td><td>Tempo total em milissegundos</td></tr>
+          <tr><td><code>fastestLap</code></td><td><span class="type-tag">string</span></td><td>Rank da volta mais rápida (1 = foi o mais rápido)</td></tr>
+          <tr><td><code>fastestLapTime</code></td><td><span class="type-tag">string</span></td><td>Tempo da volta mais rápida</td></tr>
+          <tr><td><code>fastestLapSpeed</code></td><td><span class="type-tag">string</span></td><td>Velocidade média da volta mais rápida (km/h)</td></tr>
+          <tr><td><code>statusId</code></td><td><span class="type-tag">string</span></td><td>ID do status de finalização</td></tr>
+          <tr><td><code>_season</code></td><td><span class="type-tag">int</span></td><td>Temporada</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────── SILVER ─────────── -->
+  <section id="silver">
+    <div class="section-header">
+      <div class="icon">🥈</div>
+      <div>
+        <h2>Silver Layer</h2>
+        <p>Dados limpos, deduplicados e enriquecidos com joins — prontos para agregação</p>
+      </div>
+    </div>
+
+    <!-- silver.results -->
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-silver">Silver</span>
+          <div>
+            <h3>silver.results</h3>
+            <p>Tabela principal: resultados enriquecidos com nome do piloto e informações da corrida</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Origem</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>season</code></td><td><span class="type-tag">int</span></td><td>results_raw._season</td><td>Temporada</td></tr>
+          <tr><td><code>race_round</code></td><td><span class="type-tag">string</span></td><td>results_raw.raceId</td><td>Rodada da corrida</td></tr>
+          <tr><td><code>driver_id</code></td><td><span class="type-tag">string</span></td><td>results_raw.driverId</td><td>ID do piloto</td></tr>
+          <tr><td><code>driver_name</code></td><td><span class="type-tag">string</span></td><td>drivers.full_name</td><td>Nome completo (join com drivers)</td></tr>
+          <tr><td><code>constructor_id</code></td><td><span class="type-tag">string</span></td><td>results_raw.constructorId</td><td>ID da equipe</td></tr>
+          <tr><td><code>grid_position</code></td><td><span class="type-tag">int</span></td><td>results_raw.grid</td><td>Posição de largada</td></tr>
+          <tr><td><code>final_position</code></td><td><span class="type-tag">int</span></td><td>results_raw.position</td><td>Posição de chegada</td></tr>
+          <tr><td><code>position_text</code></td><td><span class="type-tag">string</span></td><td>results_raw.positionText</td><td>Código de status (R=Retired, D=DSQ…)</td></tr>
+          <tr><td><code>points</code></td><td><span class="type-tag">float</span></td><td>results_raw.points</td><td>Pontos marcados na corrida</td></tr>
+          <tr><td><code>laps</code></td><td><span class="type-tag">int</span></td><td>results_raw.laps</td><td>Voltas completadas</td></tr>
+          <tr><td><code>finish_time</code></td><td><span class="type-tag">string</span></td><td>results_raw.time</td><td>Tempo de chegada</td></tr>
+          <tr><td><code>milliseconds</code></td><td><span class="type-tag">long</span></td><td>results_raw.milliseconds</td><td>Tempo total em ms</td></tr>
+          <tr><td><code>fastest_lap</code></td><td><span class="type-tag">int</span></td><td>results_raw.fastestLap</td><td>Rank da VR (1 = mais rápido da corrida)</td></tr>
+          <tr><td><code>fastest_lap_time</code></td><td><span class="type-tag">string</span></td><td>results_raw.fastestLapTime</td><td>Tempo da volta mais rápida</td></tr>
+          <tr><td><code>fastest_lap_speed</code></td><td><span class="type-tag">float</span></td><td>results_raw.fastestLapSpeed</td><td>Velocidade média da VR (km/h)</td></tr>
+          <tr><td><code>race_name</code></td><td><span class="type-tag">string</span></td><td>races.race_name</td><td>Nome do GP (join com races)</td></tr>
+          <tr><td><code>race_date</code></td><td><span class="type-tag">date</span></td><td>races.race_date</td><td>Data do GP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- silver.drivers -->
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-silver">Silver</span>
+          <div>
+            <h3>silver.drivers</h3>
+            <p>Pilotos deduplicados por season com nome completo e data de nascimento tipada</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>driver_id</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">string</span></td><td>Identificador único</td></tr>
+          <tr><td><code>full_name</code></td><td><span class="type-tag">string</span></td><td>Nome completo (forename + surname)</td></tr>
+          <tr><td><code>nationality</code></td><td><span class="type-tag">string</span></td><td>Nacionalidade</td></tr>
+          <tr><td><code>date_of_birth</code></td><td><span class="type-tag">date</span></td><td>Data de nascimento (tipada)</td></tr>
+          <tr><td><code>season</code></td><td><span class="type-tag">int</span></td><td>Temporada</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- silver.races -->
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-silver">Silver</span>
+          <div>
+            <h3>silver.races</h3>
+            <p>Calendário de corridas limpo — particionado por season</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>season</code></td><td><span class="type-tag">int</span></td><td>Temporada</td></tr>
+          <tr><td><code>round</code></td><td><span class="type-tag">int</span></td><td>Número da rodada</td></tr>
+          <tr><td><code>circuit_id</code></td><td><span class="type-tag">string</span></td><td>ID do circuito</td></tr>
+          <tr><td><code>race_name</code></td><td><span class="type-tag">string</span></td><td>Nome oficial do GP</td></tr>
+          <tr><td><code>race_date</code></td><td><span class="type-tag">date</span></td><td>Data da corrida</td></tr>
+          <tr><td><code>race_time</code></td><td><span class="type-tag">string</span></td><td>Horário de largada</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────── GOLD ─────────── -->
+  <section id="gold">
+    <div class="section-header">
+      <div class="icon">🥇</div>
+      <div>
+        <h2>Gold Layer</h2>
+        <p>Data marts analíticos prontos para consumo em BI, ML e GenAI</p>
+      </div>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🏆</div>
+        <h3>driver_standings</h3>
+        <p>Classificação final dos pilotos por temporada com métricas agregadas.</p>
+        <code>driver_standings.ipynb</code>
+      </div>
+      <div class="card">
+        <div class="card-icon">📈</div>
+        <h3>season_progression</h3>
+        <p>Evolução corrida a corrida com acumulados via window functions.</p>
+        <code>season_progression.ipynb</code>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏁</div>
+        <h3>race_summary_facts</h3>
+        <p>Um registro por GP com vencedor, pole, VR e estatísticas da corrida.</p>
+        <code>race_summary_facts.ipynb</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── DRIVER STANDINGS ─────────── -->
+  <section id="driver_standings">
+    <div class="section-header">
+      <div class="icon">🏆</div>
+      <div>
+        <h2>gold.driver_standings</h2>
+        <p>Classificação dos pilotos ao final de cada temporada · Particionado por season</p>
+      </div>
+    </div>
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-gold">Gold</span>
+          <div>
+            <h3>gold.driver_standings</h3>
+            <p>Fonte: silver.results · silver.drivers — Granularidade: 1 linha por piloto por temporada</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Origem</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>season</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">int</span></td><td>results.season</td><td>Temporada</td></tr>
+          <tr><td><code>championship_position</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">int</span></td><td>RANK() over season</td><td>Posição no campeonato (desempate por wins)</td></tr>
+          <tr><td><code>driver_id</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">string</span></td><td>results.driver_id</td><td>ID do piloto</td></tr>
+          <tr><td><code>driver_name</code></td><td><span class="type-tag">string</span></td><td>results.driver_name</td><td>Nome completo</td></tr>
+          <tr><td><code>nationality</code></td><td><span class="type-tag">string</span></td><td>drivers.nationality</td><td>Nacionalidade (join)</td></tr>
+          <tr><td><code>constructor_id</code></td><td><span class="type-tag">string</span></td><td>results.constructor_id</td><td>Equipe principal da temporada</td></tr>
+          <tr><td><code>total_points</code></td><td><span class="type-tag">float</span></td><td>SUM(points)</td><td>Pontos totais na temporada</td></tr>
+          <tr><td><code>points_gap_to_leader</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">float</span></td><td>leader - driver</td><td>Diferença de pontos para o 1° colocado</td></tr>
+          <tr><td><code>total_races</code></td><td><span class="type-tag">int</span></td><td>COUNT(race_round)</td><td>Corridas disputadas na temporada</td></tr>
+          <tr><td><code>wins</code></td><td><span class="type-tag">int</span></td><td>SUM(pos=1)</td><td>Vitórias</td></tr>
+          <tr><td><code>second_places</code></td><td><span class="type-tag">int</span></td><td>SUM(pos=2)</td><td>Segundos lugares</td></tr>
+          <tr><td><code>third_places</code></td><td><span class="type-tag">int</span></td><td>SUM(pos=3)</td><td>Terceiros lugares</td></tr>
+          <tr><td><code>podiums</code></td><td><span class="type-tag">int</span></td><td>SUM(pos≤3)</td><td>Total de pódios</td></tr>
+          <tr><td><code>points_finishes</code></td><td><span class="type-tag">int</span></td><td>SUM(pos≤10)</td><td>Finalizações na zona de pontos</td></tr>
+          <tr><td><code>dnfs</code></td><td><span class="type-tag">int</span></td><td>SUM(R/D/E/W/F/N)</td><td>Não-finalizações</td></tr>
+          <tr><td><code>best_finish</code></td><td><span class="type-tag">int</span></td><td>MIN(final_position)</td><td>Melhor resultado na temporada</td></tr>
+          <tr><td><code>avg_finish_position</code></td><td><span class="type-tag">float</span></td><td>AVG(final_position)</td><td>Posição média de chegada</td></tr>
+          <tr><td><code>fastest_laps</code></td><td><span class="type-tag">int</span></td><td>SUM(fastest_lap=1)</td><td>Voltas mais rápidas conquistadas</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────── SEASON PROGRESSION ─────────── -->
+  <section id="season_progression">
+    <div class="section-header">
+      <div class="icon">📈</div>
+      <div>
+        <h2>gold.season_progression</h2>
+        <p>Evolução corrida a corrida de cada piloto · Granularidade: 1 linha por piloto por rodada</p>
+      </div>
+    </div>
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-gold">Gold</span>
+          <div>
+            <h3>gold.season_progression</h3>
+            <p>Fonte: silver.results — Window functions cumulativas por (season, driver_id) ORDER BY round</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Origem</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><code>season</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">int</span></td><td>results.season</td><td>Temporada</td></tr>
+          <tr><td><code>round</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">int</span></td><td>results.race_round</td><td>Número da corrida na temporada</td></tr>
+          <tr><td><code>race_name</code></td><td><span class="type-tag">string</span></td><td>results.race_name</td><td>Nome do GP</td></tr>
+          <tr><td><code>race_date</code></td><td><span class="type-tag">date</span></td><td>results.race_date</td><td>Data do GP</td></tr>
+          <tr><td><code>driver_id</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">string</span></td><td>results.driver_id</td><td>ID do piloto</td></tr>
+          <tr><td><code>driver_name</code></td><td><span class="type-tag">string</span></td><td>results.driver_name</td><td>Nome completo</td></tr>
+          <tr><td><code>constructor_id</code></td><td><span class="type-tag">string</span></td><td>results.constructor_id</td><td>Equipe na época</td></tr>
+          <tr><td><code>points_in_race</code></td><td><span class="type-tag">float</span></td><td>results.points</td><td>Pontos ganhos nessa corrida</td></tr>
+          <tr><td><code>cumulative_points</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">float</span></td><td>SUM OVER window</td><td>Pontos acumulados até essa rodada</td></tr>
+          <tr><td><code>championship_position</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">int</span></td><td>RANK() over round</td><td>Posição no campeonato após essa corrida</td></tr>
+          <tr><td><code>wins_so_far</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">int</span></td><td>SUM(win) OVER window</td><td>Total de vitórias acumuladas</td></tr>
+          <tr><td><code>podiums_so_far</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">int</span></td><td>SUM(podium) OVER window</td><td>Total de pódios acumulados</td></tr>
+          <tr><td><code>dnfs_so_far</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">int</span></td><td>SUM(dnf) OVER window</td><td>Total de DNFs acumulados</td></tr>
+          <tr><td><code>gap_to_leader</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">float</span></td><td>FIRST(pts) - driver_pts</td><td>Diferença para o líder naquele momento</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────── RACE SUMMARY FACTS ─────────── -->
+  <section id="race_summary_facts">
+    <div class="section-header">
+      <div class="icon">🏁</div>
+      <div>
+        <h2>gold.race_summary_facts</h2>
+        <p>Fatos agregados por GP · Granularidade: 1 linha por corrida</p>
+      </div>
+    </div>
+    <div class="table-doc">
+      <div class="table-doc-header">
+        <div class="left">
+          <span class="table-layer-badge layer-gold">Gold</span>
+          <div>
+            <h3>gold.race_summary_facts</h3>
+            <p>Fonte: silver.races + silver.results — Joins com vencedor, pole e volta mais rápida</p>
+          </div>
+        </div>
+      </div>
+      <table class="col-table">
+        <thead><tr><th>Coluna</th><th>Tipo</th><th>Origem</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td colspan="4" style="background:rgba(255,255,255,.03);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Identificação</td></tr>
+          <tr><td><code>season</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">int</span></td><td>races.season</td><td>Temporada</td></tr>
+          <tr><td><code>round</code> <span class="pk-tag">PK</span></td><td><span class="type-tag">int</span></td><td>races.round</td><td>Número da rodada</td></tr>
+          <tr><td><code>race_name</code></td><td><span class="type-tag">string</span></td><td>races.race_name</td><td>Nome do GP</td></tr>
+          <tr><td><code>race_date</code></td><td><span class="type-tag">date</span></td><td>races.race_date</td><td>Data da corrida</td></tr>
+          <tr><td><code>circuit_id</code></td><td><span class="type-tag">string</span></td><td>races.circuit_id</td><td>Identificador do circuito</td></tr>
+          <tr><td colspan="4" style="background:rgba(255,255,255,.03);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Vencedor</td></tr>
+          <tr><td><code>winner_driver_id</code></td><td><span class="type-tag">string</span></td><td>results(pos=1)</td><td>ID do vencedor</td></tr>
+          <tr><td><code>winner_driver_name</code></td><td><span class="type-tag">string</span></td><td>results(pos=1)</td><td>Nome do vencedor</td></tr>
+          <tr><td><code>winner_constructor_id</code></td><td><span class="type-tag">string</span></td><td>results(pos=1)</td><td>Equipe vencedora</td></tr>
+          <tr><td><code>winning_time</code></td><td><span class="type-tag">string</span></td><td>results(pos=1)</td><td>Tempo de chegada do vencedor</td></tr>
+          <tr><td><code>winning_milliseconds</code></td><td><span class="type-tag">long</span></td><td>results(pos=1)</td><td>Tempo total em ms</td></tr>
+          <tr><td><code>winning_margin_ms</code> <span class="calc-tag">calc</span></td><td><span class="type-tag">long</span></td><td>2°ms - 1°ms</td><td>Margem de vitória em milissegundos</td></tr>
+          <tr><td colspan="4" style="background:rgba(255,255,255,.03);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Pole Position</td></tr>
+          <tr><td><code>pole_driver_id</code></td><td><span class="type-tag">string</span></td><td>results(grid=1)</td><td>ID do piloto na pole</td></tr>
+          <tr><td><code>pole_driver_name</code></td><td><span class="type-tag">string</span></td><td>results(grid=1)</td><td>Nome do piloto na pole</td></tr>
+          <tr><td colspan="4" style="background:rgba(255,255,255,.03);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Volta Mais Rápida</td></tr>
+          <tr><td><code>fastest_lap_driver_id</code></td><td><span class="type-tag">string</span></td><td>results(fl=1)</td><td>ID do piloto com a VR</td></tr>
+          <tr><td><code>fastest_lap_driver_name</code></td><td><span class="type-tag">string</span></td><td>results(fl=1)</td><td>Nome do piloto com a VR</td></tr>
+          <tr><td><code>fastest_lap_time</code></td><td><span class="type-tag">string</span></td><td>results.fastest_lap_time</td><td>Tempo da volta mais rápida</td></tr>
+          <tr><td><code>fastest_lap_speed</code></td><td><span class="type-tag">float</span></td><td>results.fastest_lap_speed</td><td>Velocidade média da VR (km/h)</td></tr>
+          <tr><td colspan="4" style="background:rgba(255,255,255,.03);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Estatísticas Gerais</td></tr>
+          <tr><td><code>race_laps</code></td><td><span class="type-tag">int</span></td><td>MAX(laps)</td><td>Total de voltas da corrida</td></tr>
+          <tr><td><code>total_starters</code></td><td><span class="type-tag">int</span></td><td>COUNT(driver_id)</td><td>Pilotos que largaram</td></tr>
+          <tr><td><code>total_classified</code></td><td><span class="type-tag">int</span></td><td>SUM(pos IS NOT NULL)</td><td>Pilotos classificados</td></tr>
+          <tr><td><code>dnf_count</code></td><td><span class="type-tag">int</span></td><td>SUM(R/D/E/W/F/N)</td><td>Não-finalizações</td></tr>
+          <tr><td><code>total_points_awarded</code></td><td><span class="type-tag">float</span></td><td>SUM(points)</td><td>Total de pontos distribuídos no GP</td></tr>
+          <tr><td><code>avg_grid_position</code></td><td><span class="type-tag">float</span></td><td>AVG(grid_position)</td><td>Posição média de largada do grid</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─────────── EXPECTATIONS ─────────── -->
+  <section id="expectations">
+    <div class="section-header">
+      <div class="icon">✅</div>
+      <div>
+        <h2>DLT Expectations — Qualidade de Dados</h2>
+        <p>Regras de qualidade aplicadas em cada tabela do pipeline</p>
+      </div>
+    </div>
+
+    <div class="exp-block">
+      <h4>silver.drivers</h4>
+      <ul class="exp-list">
+        <li><code>valid_driver_id</code> — driver_id IS NOT NULL</li>
+        <li><code>valid_name</code> — full_name IS NOT NULL</li>
+      </ul>
+    </div>
+
+    <div class="exp-block">
+      <h4>silver.results</h4>
+      <ul class="exp-list">
+        <li><code>valid_driver_id</code> — driver_id IS NOT NULL</li>
+        <li><code>valid_points</code> — points &gt;= 0</li>
+        <li><code>valid_position</code> — final_position IS NULL OR final_position &gt; 0</li>
+      </ul>
+    </div>
+
+    <div class="exp-block">
+      <h4>gold.driver_standings</h4>
+      <ul class="exp-list">
+        <li><code>valid_driver_id</code> — driver_id IS NOT NULL</li>
+        <li><code>valid_season</code> — season IS NOT NULL</li>
+        <li><code>valid_championship_position</code> — championship_position &gt; 0</li>
+        <li><code>non_negative_points</code> — total_points &gt;= 0</li>
+      </ul>
+    </div>
+
+    <div class="exp-block">
+      <h4>gold.season_progression</h4>
+      <ul class="exp-list">
+        <li><code>valid_driver_id</code> — driver_id IS NOT NULL</li>
+        <li><code>valid_round</code> — round IS NOT NULL</li>
+        <li><code>valid_season</code> — season IS NOT NULL</li>
+      </ul>
+    </div>
+
+    <div class="exp-block">
+      <h4>gold.race_summary_facts</h4>
+      <ul class="exp-list">
+        <li><code>valid_season</code> — season IS NOT NULL</li>
+        <li><code>valid_round</code> — round IS NOT NULL</li>
+        <li><code>has_starters</code> — total_starters &gt; 0</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ─────────── TECHNOLOGIES ─────────── -->
+  <section id="technologies">
+    <div class="section-header">
+      <div class="icon">⚙️</div>
+      <div>
+        <h2>Tecnologias</h2>
+        <p>Stack completa da plataforma</p>
+      </div>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-icon">🟥</div>
+        <div>
+          <h4>Databricks</h4>
+          <p>Plataforma de execução, orquestração e governança</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">⚡</div>
+        <div>
+          <h4>Delta Live Tables</h4>
+          <p>Pipelines declarativos com qualidade de dados nativa</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🔥</div>
+        <div>
+          <h4>Apache Spark</h4>
+          <p>Motor de processamento distribuído</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🔺</div>
+        <div>
+          <h4>Delta Lake</h4>
+          <p>Formato de armazenamento ACID com time travel</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">📚</div>
+        <div>
+          <h4>Unity Catalog</h4>
+          <p>Governança unificada de dados e metadados</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🐍</div>
+        <div>
+          <h4>Python 3.10+</h4>
+          <p>Linguagem principal dos pipelines DLT</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">🤖</div>
+        <div>
+          <h4>OpenAI / GenAI</h4>
+          <p>Geração automática de relatórios e insights</p>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-icon">📊</div>
+        <div>
+          <h4>Power BI / Tableau</h4>
+          <p>Visualização e dashboards de negócio</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>F1 Lakehouse</span> — Sistema de Engenharia de Dados · Databricks &amp; GenAI
+    <span style="color:var(--text-muted)">Gerado em 2026 · f1_lakehouse catalog</span>
+  </footer>
+
+</main>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('section[id], div.hero');
+  const navLinks  = document.querySelectorAll('nav a[href^="#"]');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
